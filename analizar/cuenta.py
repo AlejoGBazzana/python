@@ -7,37 +7,34 @@ from validaciones_cuenta import (
     pedir_cbu_hasta_valido,
     pedir_numero_cuenta_hasta_valido,
     pedir_saldo_inicial_hasta_valido,
-    pedir_monto_hasta_valido)
+    pedir_monto_hasta_valido,
+    pedir_motivo_hasta_valido,
+    )
 
+__slots__ = ['motivo', 'monto', 'tipo_de_operacion', 'fecha']
+   
 class Movimiento:
     def __init__(self, motivo: str, monto: float,tipo: str,fecha: str) -> None:
         self.motivo = motivo
         self.monto = float (monto)
         self.tipo = tipo.upper()
         self.fecha = fecha
-    __slots__ = ['motivo', 'monto', 'tipo_de_operacion', 'fecha']
-    
+ 
     def __str__(self) -> str:
         signo = "+" if self.tipo.startswith("DEP") else "-"
         return f"{self.fecha} | {self.motivo} | {self.tipo}   {signo}${self.monto:.2f}"
-    
-    
-    @property
-    def motivo(self):
-        return self.motivo
-    
-    @property
-    def monto(self):
-        return self.monto
-    
-    @property
-    def tipo_de_operacion(self):
-        return self.tipo_de_operacion
-    
-    @property
-    def fecha(self):
-
-
+ 
+#------- Nuevo: ver todos los movimientos-------
+    def ver_movimientos(self):
+        print("=== Movimientos ===")
+        if not self.movimientos:
+            print("No hay movimientos registrados.")
+            return
+        print(f"{'Fecha y hora': 20s} |{'Importe':>12s} | {'Motivo':>20s} ")
+        print("-" * 60)
+        for mv in self.movimientos:
+            signo = "+" if mv.tipo.startswith("DEP") else "-"
+            print(f"{mv.fecha:20s} | {signo}${mv.monto:11.2f} | {mv.motivo:20s}")
 
 class Cuenta:
     def __init__(self, numero, cbu, alias, cliente: Cliente, saldo=0.0) -> None:
@@ -89,7 +86,7 @@ class Cuenta:
         print(f"Cliente: {self.cliente.nombre}")
         print(f"N°: {self.numero_cuenta_formateado} - Alias: {self.alias} - CBU: {self.cbu}")
 
-    def __imprimir_movimiento(self, ch, monto):
+    def __imprimir_movimiento(self, ch, monto, motivo=""):
         motivo = input("Motivo de la operación: ").strip()
         print(
             f"Movimiento ejecutado:\n"
@@ -99,8 +96,10 @@ class Cuenta:
 
     def depositar(self, monto) -> bool:
         mv = pedir_monto_hasta_valido(monto)
+        motivo = pedir_motivo_hasta_valido(input("Motivo (1..20): "))
         self.__saldo += mv
-        self.__imprimir_movimiento("+", mv)
+        self._movimientos.append(Movimiento(ahora_str(), mv, "DEPÓSITO", motivo))
+        self.__imprimir_movimiento("+", mv,motivo)
         return True
 
     def extraer(self, monto) -> bool:
