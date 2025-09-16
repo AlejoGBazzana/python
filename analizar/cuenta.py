@@ -7,8 +7,36 @@ from validaciones_cuenta import (
     pedir_cbu_hasta_valido,
     pedir_numero_cuenta_hasta_valido,
     pedir_saldo_inicial_hasta_valido,
-    pedir_monto_hasta_valido
-)
+    pedir_monto_hasta_valido)
+
+class Movimiento:
+    def __init__(self, motivo: str, monto: float,tipo: str,fecha: str) -> None:
+        self.motivo = motivo
+        self.monto = float (monto)
+        self.tipo = tipo.upper()
+        self.fecha = fecha
+    __slots__ = ['motivo', 'monto', 'tipo_de_operacion', 'fecha']
+    
+    def __str__(self) -> str:
+        signo = "+" if self.tipo.startswith("DEP") else "-"
+        return f"{self.fecha} | {self.motivo} | {self.tipo}   {signo}${self.monto:.2f}"
+    
+    
+    @property
+    def motivo(self):
+        return self.motivo
+    
+    @property
+    def monto(self):
+        return self.monto
+    
+    @property
+    def tipo_de_operacion(self):
+        return self.tipo_de_operacion
+    
+    @property
+    def fecha(self):
+
 
 
 class Cuenta:
@@ -18,7 +46,8 @@ class Cuenta:
         self.__alias = pedir_alias_hasta_valido(alias)
         self.__cliente = cliente
         self.__saldo = pedir_saldo_inicial_hasta_valido(saldo)
-
+        self.__movimientos: list[Movimiento] = []
+        
     # --- getters ---
     @property
     def numero_cuenta(self):
